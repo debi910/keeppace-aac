@@ -1,0 +1,150 @@
+{
+  "split": "test",
+  "n": 1400,
+  "words": 11294,
+  "chars": 53662,
+  "rows": [
+    {
+      "system": "letters",
+      "label": "Spelling, no prediction",
+      "keystrokes": 55062,
+      "ksr": -2.6,
+      "wpm": 12.3,
+      "firstTry": null,
+      "fixesPerReply": null,
+      "msPerReply": null
+    },
+    {
+      "system": "wordpred",
+      "label": "Word prediction (typical AAC)",
+      "keystrokes": 26100,
+      "ksr": 51.4,
+      "wpm": 26,
+      "firstTry": null,
+      "fixesPerReply": null,
+      "msPerReply": null
+    },
+    {
+      "system": "wordpred+ctx",
+      "label": "Word prediction + conversation",
+      "keystrokes": 25389,
+      "ksr": 52.7,
+      "wpm": 26.7,
+      "firstTry": null,
+      "fixesPerReply": null,
+      "msPerReply": null
+    },
+    {
+      "system": "keeppace-noctx",
+      "label": "KeepPace, no conversation",
+      "keystrokes": 30840,
+      "ksr": 42.5,
+      "wpm": 22,
+      "firstTry": 9.3,
+      "fixesPerReply": 4.23,
+      "msPerReply": 22
+    },
+    {
+      "system": "keeppace",
+      "label": "KeepPace offline",
+      "keystrokes": 29830,
+      "ksr": 44.4,
+      "wpm": 22.7,
+      "firstTry": 9.6,
+      "fixesPerReply": 4.11,
+      "msPerReply": 23
+    }
+  ],
+  "examples": [
+    {
+      "partner": "What's the weather forecast?",
+      "abbrev": "hah",
+      "text": "hot and humid",
+      "offlineTop": "how about hamburgers"
+    },
+    {
+      "partner": "Hot and humid.",
+      "abbrev": "uialftw",
+      "text": "ugh i'm already looking forward to winter",
+      "offlineTop": "um i and lots for the warning"
+    },
+    {
+      "partner": "Ugh. I'm already looking forward to winter.",
+      "abbrev": "ymwatbi",
+      "text": "you mean with all that black ice",
+      "offlineTop": "you mean weather apps two black items"
+    },
+    {
+      "partner": "You mean with all that black ice?",
+      "abbrev": "yigyrtastcaaw",
+      "text": "yeah i guess you're right there's always something to complain about any weather",
+      "offlineTop": "yeah i guess you remember to ask strangers to call and ask weather"
+    },
+    {
+      "partner": "Yeah, I guess you're right. There's always something to complain about any weather.",
+      "abbrev": "tastbhaiawijdohywtvyd",
+      "text": "there's also something to be happy about in any weather it just depends on how you want to view your day",
+      "offlineTop": "there's a something to be homemade and i are weather in january do on how you what's the verdict you're dumber"
+    },
+    {
+      "partner": "Could you please get me a drink of water?",
+      "abbrev": "swyliii",
+      "text": "sure would you like ice in it",
+      "offlineTop": "sure would you like ice in it"
+    },
+    {
+      "partner": "Sure. Would you like ice in it?",
+      "abbrev": "oyp",
+      "text": "oh yes please",
+      "offlineTop": "oh yes please"
+    },
+    {
+      "partner": "Oh! Yes please!",
+      "abbrev": "npbrb",
+      "text": "no problem be right back",
+      "offlineTop": "no please be right back"
+    },
+    {
+      "partner": "No problem, be right back.",
+      "abbrev": "msyuacg",
+      "text": "make sure you use a clean glass",
+      "offlineTop": "make sure you up a card game"
+    },
+    {
+      "partner": "Make sure you use a clean glass!",
+      "abbrev": "atadgiwtcd",
+      "text": "are there actually dirty glasses in with the clean dishes",
+      "offlineTop": "are they are doing great i want to come drink"
+    },
+    {
+      "partner": "Did you get the oil changed in the car?",
+      "abbrev": "idekhtctob",
+      "text": "i don't even know how to change the oil brah",
+      "offlineTop": "i don't enjoy know how to car then oil but"
+    },
+    {
+      "partner": "I don't even know how to change the oil, brah.",
+      "abbrev": "yiwo",
+      "text": "yes it's way overdue",
+      "offlineTop": "yes it was okay"
+    },
+    {
+      "partner": "Yes, it's way overdue!",
+      "abbrev": "wsitithid",
+      "text": "where should i take it to have it done",
+      "offlineTop": "where should i think i think he is doing"
+    },
+    {
+      "partner": "Where should I take it to have it done?",
+      "abbrev": "tittdddtsfutwcify",
+      "text": "take it to the dodge dealership down the street from us they will change it for you",
+      "offlineTop": "thanks i'll take the deal do don't think so for us to watch changed it for you"
+    },
+    {
+      "partner": "Take it to the Dodge dealership down the street from us. They will change it for you.",
+      "abbrev": "otfta",
+      "text": "ok thanks for the advice",
+      "offlineTop": "ok thanks for the afternoon"
+    }
+  ]
+}
