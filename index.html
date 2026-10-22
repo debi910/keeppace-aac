@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KeepPace</title>
+  <meta name="description" content="A context-aware AAC keyboard: type word initials, speak full sentences, keep pace with the conversation.">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="bar">
+    <h1>KeepPace</h1>
+    <div class="stats" id="stats" aria-live="polite"></div>
+    <a class="stats-link" href="bench.html">Benchmark</a>
+    <button class="target small" id="btn-settings" aria-label="Settings">Settings</button>
+  </header>
+
+  <main>
+    <section class="convo" aria-label="Conversation">
+      <div class="convo-head">
+        <button class="target small" id="btn-listen" aria-pressed="false">Listen</button>
+        <form id="partner-form" class="partner-form">
+          <input id="partner-input" type="text" placeholder="Or type what your partner said" autocomplete="off" aria-label="What your partner said">
+          <button class="target small" type="submit">Add</button>
+        </form>
+      </div>
+      <ol id="turns" class="turns" aria-live="polite"></ol>
+      <div id="interim" class="interim"></div>
+    </section>
+
+    <section class="compose" aria-label="Compose">
+      <div class="typed-row">
+        <div id="typed" class="typed" aria-live="polite"></div>
+        <span id="llm-status" class="llm-status"></span>
+      </div>
+      <ol id="suggestions" class="suggestions" data-scan-group="Suggestions"></ol>
+      <div id="chips-wrap" class="chips-wrap">
+        <span class="hint">Wrong word? Tap it:</span>
+        <div id="chips" class="chips" data-scan-group="Words"></div>
+      </div>
+      <div id="slot-panel" class="slot-panel" hidden>
+        <span class="hint" id="slot-hint"></span>
+        <div id="slot-options" class="chips" data-scan-group="Word options"></div>
+      </div>
+      <div id="keyboard" class="keyboard" aria-label="Keyboard"></div>
+    </section>
+  </main>
+
+  <dialog id="settings">
+    <form method="dialog" class="settings">
+      <h2>Settings</h2>
+      <label>Claude API key (stored only in this browser)
+        <input id="set-key" type="password" autocomplete="off" placeholder="sk-ant-...">
+      </label>
+      <label>Claude model
+        <select id="set-model">
+          <option value="claude-opus-5-5">Claude Opus 5.5 (best)</option>
+          <option value="claude-sonnet-5-5">Claude Sonnet 5.5</option>
+          <option value="claude-haiku-5-5">Claude Haiku 5.5 (fastest)</option>
+        </select>
+      </label>
+      <fieldset>
+        <legend>Hands-free input</legend>
+        <label class="row"><input id="set-dwell" type="checkbox"> Dwell to select (eye tracker or head mouse)</label>
+        <label>Dwell time (ms) <input id="set-dwell-ms" type="number" min="300" max="3000" step="100"></label>
+        <label class="row"><input id="set-scan" type="checkbox"> Single-switch scanning (Space selects)</label>
+        <label>Scan step (ms) <input id="set-scan-ms" type="number" min="400" max="4000" step="100"></label>
+      </fieldset>
+      <label>Voice <select id="set-voice"></select></label>
+      <label>Things I often say (one per line). KeepPace learns your wording from these and from what you speak.
+        <textarea id="set-phrases" rows="6"></textarea>
+      </label>
+      <div class="row">
+        <button class="target small" value="save">Save</button>
+        <button class="target small" value="cancel" formnovalidate>Cancel</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "keeppace-aac",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build-model": "python3 tools/build_lm.py --turk data/raw/turk-dialogues.txt --out model/lm.json",
+    "bench": "node eval/benchmark.mjs --split test --json eval/results-test.json",
+    "serve": "python3 -m http.server 8000"
+  },
+  "optionalDependencies": {
+    "@anthropic-ai/sdk": "0.131.0"
+  }
+}
