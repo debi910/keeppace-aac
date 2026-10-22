@@ -39,7 +39,20 @@ KeepPace keeps the user in control of every word (unlike reply generators), runs
 
 Words per minute assume one selection per second, a typical pace for experienced eye-gaze users.
 
-RESULTS_TABLE
+Test split, 1,400 replies (11,294 words):
+
+| Method | Selections | Saved vs spelling | Words/min |
+|---|---|---|---|
+| Spelling, no prediction | 55,062 | -2.6% | 12.3 |
+| Word prediction (typical AAC) | 26,100 | 51.4% | 26.0 |
+| Word prediction + KeepPace's conversation adaptation | 25,389 | 52.7% | 26.7 |
+| KeepPace offline, no conversation | 30,840 | 42.5% | 22.0 |
+| KeepPace offline | 29,830 | 44.4% | 22.7 |
+| KeepPace + AI model | *pending* | | |
+
+What this shows so far:
+- Listening to the partner helps every method: it saves selections for word prediction and for initials.
+- The small offline model alone is **not** better than a mature word predictor. Expanding initials into a whole sentence needs a strong language model, which is why the AI layer exists. Published research with a fine-tuned 64B model reached about 74% top-5 accuracy on this data with one turn of context (Cai et al., 2022).
 
 ## Run it
 
