@@ -66,7 +66,7 @@ Rebuild the language model: `pip install wordfreq && npm run build-model`.
 | `index.html`, `app.js`, `styles.css` | The keyboard |
 | `src/decoder.js` | Beam-search initials decoder, slot options, verification of outside suggestions |
 | `src/lm.js` | Trigram model, conversation cache, personal model |
-| `src/llm.js` | Claude suggestions |
+| `src/llm.js` | AI suggestions (Gemini, Groq or Claude) |
 | `src/bench.js`, `bench.html`, `eval/benchmark.mjs` | Benchmark core, browser runner, Node runner |
 | `tools/build_lm.py` | Builds `model/lm.json` from the training dialogues and `wordfreq` |
 

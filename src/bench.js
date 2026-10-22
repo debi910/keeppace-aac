@@ -92,7 +92,7 @@ export const SYSTEMS = {
   'wordpred+ctx': 'Word prediction + conversation',
   'keeppace-noctx': 'KeepPace, no conversation',
   keeppace: 'KeepPace offline',
-  'keeppace+llm': 'KeepPace + Claude',
+  'keeppace+llm': 'KeepPace + AI model',
 };
 
 // Runs every system on one item and adds to `acc`. `llmCandidates` is the

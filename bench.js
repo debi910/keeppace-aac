@@ -1,6 +1,6 @@
 import { NgramLM } from './src/lm.js';
 import { Decoder } from './src/decoder.js';
-import { LLMSuggester, DEFAULT_MODEL } from './src/llm.js';
+import { LLMSuggester, PROVIDERS, rateLimited } from './src/llm.js';
 import { tokenize, initialsOf } from './src/text.js';
 import { parseTurk, scoreItem, newAcc, summarize } from './src/bench.js';
 
@@ -50,35 +50,46 @@ async function run() {
   progress.hidden = false;
 
   let llmResults = null;
+  let modelName = null;
   if (useLLM) {
-    if (!s.key) {
-      $('status').textContent = 'Add your Claude API key in Settings on the keyboard page first.';
+    const provider = s.provider;
+    const apiKey = provider && (s.keys || {})[provider];
+    if (!apiKey) {
+      $('status').textContent = 'Choose an AI provider and add its key in Settings on the keyboard page first.';
       $('run').disabled = false;
+      progress.hidden = true;
       return;
     }
-    const { default: Anthropic } = await import(SDK_URL);
-    const suggester = new LLMSuggester(new Anthropic({ apiKey: s.key, dangerouslyAllowBrowser: true }), { model: s.model || DEFAULT_MODEL });
+    let client = null;
+    if (provider === 'claude') {
+      const { default: Anthropic } = await import(SDK_URL);
+      client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+    }
+    const suggester = new LLMSuggester({ provider, apiKey, client, model: s.model || PROVIDERS[provider].model });
+    modelName = suggester.model;
     llmResults = {};
-    let next = 0;
-    let done = 0;
     let failed = 0;
     progress.max = items.length;
-    const worker = async () => {
-      while (next < items.length) {
-        const it = items[next++];
+    const rpm = PROVIDERS[provider].rpm;
+    await rateLimited(
+      items,
+      rpm,
+      async (it) => {
         const t0 = performance.now();
-        try {
-          const candidates = await suggester.suggest({ abbrev: initialsOf(tokenize(it.target)), context: it.context });
-          llmResults[it.id] = { candidates, ms: performance.now() - t0 };
-        } catch (e) {
+        const candidates = await suggester.suggest({ abbrev: initialsOf(tokenize(it.target)), context: it.context });
+        llmResults[it.id] = { candidates, ms: performance.now() - t0 };
+      },
+      (done, err) => {
+        if (err) {
           failed++;
-          console.warn(e);
+          console.warn(err);
+          return;
         }
-        progress.value = ++done;
-        $('status').textContent = `Asking ${suggester.model}: ${done}/${items.length}${failed ? `, ${failed} failed` : ''}`;
+        progress.value = done;
+        const mins = Math.ceil((items.length - done) / rpm);
+        $('status').textContent = `Asking ${modelName}: ${done}/${items.length}${failed ? `, ${failed} failed` : ''} (free-tier pace, about ${mins} min left)`;
       }
-    };
-    await Promise.all(Array.from({ length: 4 }, worker));
+    );
   }
 
   const ctx = { lm, plainDecoder: new Decoder(lm), ctxDecoder: new Decoder(lm) };
@@ -97,7 +108,7 @@ async function run() {
   }
   progress.hidden = true;
   const rows = summarize(acc);
-  lastResult = { split, n: acc.n, words: acc.words, chars: acc.chars, model: useLLM ? s.model || DEFAULT_MODEL : null, rows, samples, llmValid: acc.llmValid, llmTotal: acc.llmTotal };
+  lastResult = { split, n: acc.n, words: acc.words, chars: acc.chars, model: modelName, rows, samples, llmValid: acc.llmValid, llmTotal: acc.llmTotal };
   $('status').textContent = `${acc.n} replies, ${acc.words} words.`;
   render(lastResult);
   $('run').disabled = false;
@@ -131,7 +142,7 @@ function render(res) {
     [r.label, r.keystrokes, fmt(r.ksr, '%'), r.wpm, fmt(r.firstTry, '%'), fmt(r.fixesPerReply), fmt(r.msPerReply)].forEach((v) => (tr.insertCell().textContent = v));
   }
   $('llm-valid').textContent = res.llmTotal
-    ? `${((100 * res.llmValid) / res.llmTotal).toFixed(1)}% of Claude's raw suggestions matched the typed initials; the rest were filtered out before display.`
+    ? `${((100 * res.llmValid) / res.llmTotal).toFixed(1)}% of ${res.model}'s raw suggestions matched the typed initials; the rest were filtered out before display.`
     : '';
   $('samples').replaceChildren(
     ...res.samples.map((s) => {

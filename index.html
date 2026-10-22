@@ -49,15 +49,19 @@
   <dialog id="settings">
     <form method="dialog" class="settings">
       <h2>Settings</h2>
-      <label>Claude API key (stored only in this browser)
-        <input id="set-key" type="password" autocomplete="off" placeholder="sk-ant-...">
-      </label>
-      <label>Claude model
-        <select id="set-model">
-          <option value="claude-opus-5-5">Claude Opus 5.5 (best)</option>
-          <option value="claude-sonnet-5-5">Claude Sonnet 5.5</option>
-          <option value="claude-haiku-5-5">Claude Haiku 5.5 (fastest)</option>
+      <label>AI model provider (optional, KeepPace works offline without one)
+        <select id="set-provider">
+          <option value="">None, offline only</option>
+          <option value="gemini">Google Gemini (free tier)</option>
+          <option value="groq">Groq (free tier, fastest)</option>
+          <option value="claude">Claude (paid API)</option>
         </select>
+      </label>
+      <label>API key, stored only in this browser. <a id="key-link" target="_blank" rel="noopener">Get a free key</a>
+        <input id="set-key" type="password" autocomplete="off">
+      </label>
+      <label>Model
+        <span class="row"><select id="set-model"></select><button class="target small" type="button" id="btn-models">Load models</button></span>
       </label>
       <fieldset>
         <legend>Hands-free input</legend>

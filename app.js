@@ -1,6 +1,6 @@
 import { NgramLM } from './src/lm.js';
 import { Decoder } from './src/decoder.js';
-import { LLMSuggester, DEFAULT_MODEL } from './src/llm.js';
+import { LLMSuggester, PROVIDERS, listModels } from './src/llm.js';
 import { toDisplay, tokenize } from './src/text.js';
 
 const SDK_URL = 'https://cdn.jsdelivr.net/npm/@anthropic-ai/sdk@0.131.0/+esm';
@@ -24,7 +24,7 @@ const store = {
 };
 
 const settings = Object.assign(
-  { key: '', model: DEFAULT_MODEL, dwell: false, dwellMs: 900, scan: false, scanMs: 1200, voice: '' },
+  { provider: '', keys: {}, model: '', dwell: false, dwellMs: 900, scan: false, scanMs: 1200, voice: '' },
   store.get('settings', {})
 );
 let myPhrases = store.get('phrases', []); // typed in settings
@@ -79,7 +79,7 @@ function scheduleLLM() {
   if (llmCache.has(key)) return;
   llmTimer = setTimeout(async () => {
     const seq = ++llmSeq;
-    state.llmStatus = 'Asking Claude…';
+    state.llmStatus = `Asking ${aiName()}…`;
     renderStatus();
     const t0 = performance.now();
     try {
@@ -91,13 +91,13 @@ function scheduleLLM() {
       });
       llmCache.set(key, candidates);
       if (seq === llmSeq) {
-        state.llmStatus = `Claude ${((performance.now() - t0) / 1000).toFixed(1)}s`;
+        state.llmStatus = `${aiName()} ${((performance.now() - t0) / 1000).toFixed(1)}s`;
         if (key === llmKey()) recompute();
         else renderStatus();
       }
     } catch (e) {
       if (seq === llmSeq) {
-        state.llmStatus = 'Claude unavailable, using offline model';
+        state.llmStatus = `${aiName()} unavailable, using offline model`;
         renderStatus();
       }
       console.warn(e);
@@ -107,14 +107,26 @@ function scheduleLLM() {
 
 async function initLLM() {
   llm = null;
-  if (!settings.key) return;
+  const provider = settings.provider;
+  const apiKey = provider && settings.keys[provider];
+  if (!apiKey) return;
+  const model = settings.model || PROVIDERS[provider].model;
   try {
-    const { default: Anthropic } = await import(SDK_URL);
-    llm = new LLMSuggester(new Anthropic({ apiKey: settings.key, dangerouslyAllowBrowser: true }), { model: settings.model });
+    let client = null;
+    if (provider === 'claude') {
+      const { default: Anthropic } = await import(SDK_URL);
+      client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+    }
+    llm = new LLMSuggester({ provider, apiKey, client, model });
+    state.llmStatus = `${PROVIDERS[provider].label.split(' (')[0]} ready`;
   } catch (e) {
-    state.llmStatus = 'Could not load the Claude SDK';
+    state.llmStatus = 'Could not load the AI provider';
     console.warn(e);
   }
+}
+
+function aiName() {
+  return llm ? PROVIDERS[llm.provider].label.split(' (')[0] : 'AI';
 }
 
 // ---------- actions ----------
@@ -300,7 +312,7 @@ function render() {
     ...state.ranked.map((r, i) => {
       const b = button('', () => pickSuggestion(r));
       b.append(el('span', { class: 'num', text: String(i + 1) }), el('span', { text: toDisplay(r.words) }));
-      if (r.source !== 'lm') b.append(el('span', { class: 'badge', text: r.source === 'llm' ? 'Claude ✓' : 'yours' }));
+      if (r.source !== 'lm') b.append(el('span', { class: 'badge', text: r.source === 'llm' ? `${aiName()} ✓` : 'yours' }));
       return el('li', {}, [b]);
     })
   );
@@ -469,8 +481,8 @@ document.addEventListener('keydown', (e) => {
 
 // ---------- settings ----------
 function openSettings() {
-  $('set-key').value = settings.key;
-  $('set-model').value = settings.model;
+  $('set-provider').value = settings.provider;
+  syncProviderFields(settings.model);
   $('set-dwell').checked = settings.dwell;
   $('set-dwell-ms').value = settings.dwellMs;
   $('set-scan').checked = settings.scan;
@@ -485,10 +497,44 @@ function openSettings() {
   $('settings').showModal();
 }
 
+function setModelOptions(models, selected) {
+  $('set-model').replaceChildren(...models.map((m) => el('option', { value: m, text: m })));
+  if (selected && models.includes(selected)) $('set-model').value = selected;
+}
+
+function syncProviderFields(selected) {
+  const p = $('set-provider').value;
+  const info = PROVIDERS[p];
+  $('set-key').disabled = $('set-model').disabled = $('btn-models').disabled = !p;
+  $('set-key').value = (p && settings.keys[p]) || '';
+  $('key-link').hidden = !p;
+  if (info) {
+    $('key-link').href = info.keyUrl;
+    $('key-link').textContent = p === 'claude' ? 'Get a key' : 'Get a free key';
+  }
+  setModelOptions(info ? [...new Set([selected && p === settings.provider ? selected : info.model, info.model])] : [], selected);
+}
+
+$('set-provider').addEventListener('change', () => syncProviderFields(null));
+$('btn-models').addEventListener('click', async () => {
+  const p = $('set-provider').value;
+  const btn = $('btn-models');
+  btn.textContent = 'Loading…';
+  try {
+    const models = await listModels(p, $('set-key').value.trim());
+    setModelOptions(models, $('set-model').value);
+    btn.textContent = `${models.length} models`;
+  } catch (e) {
+    btn.textContent = 'Check the key';
+    console.warn(e);
+  }
+});
+
 $('settings').addEventListener('close', async () => {
   if ($('settings').returnValue !== 'save') return;
   Object.assign(settings, {
-    key: $('set-key').value.trim(),
+    provider: $('set-provider').value,
+    keys: { ...settings.keys, ...($('set-provider').value ? { [$('set-provider').value]: $('set-key').value.trim() } : {}) },
     model: $('set-model').value,
     dwell: $('set-dwell').checked,
     dwellMs: +$('set-dwell-ms').value || 900,
